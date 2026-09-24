@@ -1,34 +1,34 @@
-import { createServer } from "node:http";
-import { execFile } from "node:child_process";
-import { promisify } from "node:util";
-import { joinSession, createCanvas } from "@github/copilot-sdk/extension";
+import { createServer } from 'node:http';
+import { execFile } from 'node:child_process';
+import { promisify } from 'node:util';
+import { joinSession, createCanvas } from '@github/copilot-sdk/extension';
 
 const execFileAsync = promisify(execFile);
 const servers = new Map();
 let session;
 
 function escapeHtml(value) {
-    return String(value ?? "")
-        .replaceAll("&", "&amp;")
-        .replaceAll("<", "&lt;")
-        .replaceAll(">", "&gt;")
-        .replaceAll('"', "&quot;")
-        .replaceAll("'", "&#039;");
+    return String(value ?? '')
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll('\'', '&#039;');
 }
 
 async function loadIssues() {
     const [{ stdout: issuesJson }, { stdout: repo }] = await Promise.all([
-        execFileAsync("gh", [
-            "issue",
-            "list",
-            "--state",
-            "open",
-            "--limit",
-            "50",
-            "--json",
-            "number,title,body,labels,assignees,comments,updatedAt,url",
+        execFileAsync('gh', [
+            'issue',
+            'list',
+            '--state',
+            'open',
+            '--limit',
+            '50',
+            '--json',
+            'number,title,body,labels,assignees,comments,updatedAt,url',
         ]),
-        execFileAsync("gh", ["repo", "view", "--json", "nameWithOwner", "--jq", ".nameWithOwner"]),
+        execFileAsync('gh', ['repo', 'view', '--json', 'nameWithOwner', '--jq', '.nameWithOwner']),
     ]);
     const issues = JSON.parse(issuesJson);
     const now = Date.now();
@@ -36,7 +36,7 @@ async function loadIssues() {
         .map((issue) => {
             const labels = issue.labels.map((label) => label.name.toLowerCase());
             const ageInDays = Math.max(0, (now - Date.parse(issue.updatedAt)) / 86_400_000);
-            const urgencyLabels = ["critical", "urgent", "priority", "blocker", "bug", "security"];
+            const urgencyLabels = ['critical', 'urgent', 'priority', 'blocker', 'bug', 'security'];
             const urgencyScore = labels.reduce(
                 (score, label) => score + (urgencyLabels.some((term) => label.includes(term)) ? 8 : 0),
                 0,
@@ -47,18 +47,18 @@ async function loadIssues() {
                 Math.min(issue.comments, 10) * 0.5 +
                 (issue.assignees.length === 0 ? 2 : 0);
             const reasons = [];
-            if (urgencyScore > 0) reasons.push("has an urgency or impact label");
-            if (issue.assignees.length === 0) reasons.push("has no assignee");
+            if (urgencyScore > 0) reasons.push('has an urgency or impact label');
+            if (issue.assignees.length === 0) reasons.push('has no assignee');
             if (ageInDays >= 7) reasons.push(`has been open without an update for ${Math.floor(ageInDays)} days`);
-            if (issue.comments >= 5) reasons.push("has active discussion");
-            if (reasons.length === 0) reasons.push("is among the highest-scoring open issues");
+            if (issue.comments >= 5) reasons.push('has active discussion');
+            if (reasons.length === 0) reasons.push('is among the highest-scoring open issues');
 
             return {
                 ...issue,
-                description: issue.body?.trim() || "No issue description was provided.",
+                description: issue.body?.trim() || 'No issue description was provided.',
                 labels,
                 score,
-                justification: reasons.slice(0, 2).join(" and "),
+                justification: reasons.slice(0, 2).join(' and '),
             };
         })
         .sort((left, right) => right.score - left.score || left.number - right.number);
@@ -69,12 +69,12 @@ async function loadIssues() {
 function renderIssue(issue, isPriority) {
     const labels = issue.labels
         .map((label) => `<span class="label">${escapeHtml(label)}</span>`)
-        .join("");
+        .join('');
     const priority = isPriority
         ? `<p class="reason"><strong>Why now:</strong> ${escapeHtml(issue.justification)}.</p>`
-        : "";
+        : '';
 
-    return `<article class="card ${isPriority ? "priority" : ""}">
+    return `<article class="card ${isPriority ? 'priority' : ''}">
       <div class="card-heading">
         <span class="issue-number">#${issue.number}</span>
         <a href="${escapeHtml(issue.url)}" target="_blank" rel="noreferrer">${escapeHtml(issue.title)}</a>
@@ -90,10 +90,10 @@ function renderHtml(board) {
     const priorities = board.issues.slice(0, 3);
     const remainder = board.issues.slice(3);
     const priorityMarkup = priorities.length
-        ? priorities.map((issue) => renderIssue(issue, true)).join("")
+        ? priorities.map((issue) => renderIssue(issue, true)).join('')
         : '<p class="empty">No open issues found.</p>';
     const remainderMarkup = remainder.length
-        ? remainder.map((issue) => renderIssue(issue, false)).join("")
+        ? remainder.map((issue) => renderIssue(issue, false)).join('')
         : '<p class="empty">There are no additional open issues.</p>';
 
     return `<!doctype html>
@@ -160,54 +160,54 @@ async function addIssueToContext(issue) {
 
 async function startServer(board) {
     const server = createServer((req, res) => {
-        if (req.method === "POST" && req.url === "/add-context") {
-            let body = "";
-            req.on("data", (chunk) => {
+        if (req.method === 'POST' && req.url === '/add-context') {
+            let body = '';
+            req.on('data', (chunk) => {
                 body += chunk;
             });
-            req.on("end", async () => {
+            req.on('end', async () => {
                 try {
                     const { number } = JSON.parse(body);
                     const issue = board.issues.find((candidate) => candidate.number === number);
-                    if (!issue) throw new Error("Issue is not available on this board.");
+                    if (!issue) throw new Error('Issue is not available on this board.');
                     await addIssueToContext(issue);
-                    res.writeHead(200, { "Content-Type": "application/json" });
+                    res.writeHead(200, { 'Content-Type': 'application/json' });
                     res.end(JSON.stringify({ ok: true }));
                 } catch (error) {
-                    res.writeHead(400, { "Content-Type": "application/json" });
+                    res.writeHead(400, { 'Content-Type': 'application/json' });
                     res.end(JSON.stringify({ error: error.message }));
                 }
             });
             return;
         }
-        res.setHeader("Content-Type", "text/html; charset=utf-8");
+        res.setHeader('Content-Type', 'text/html; charset=utf-8');
         res.end(renderHtml(board));
     });
-    await new Promise((resolve) => server.listen(0, "127.0.0.1", resolve));
+    await new Promise((resolve) => server.listen(0, '127.0.0.1', resolve));
     const address = server.address();
-    const port = typeof address === "object" && address ? address.port : 0;
+    const port = typeof address === 'object' && address ? address.port : 0;
     return { server, url: `http://127.0.0.1:${port}/` };
 }
 
 session = await joinSession({
     canvases: [
         createCanvas({
-            id: "issue-triage-board",
-            displayName: "Issue triage board",
-            description: "Rank open GitHub issues by likely urgency and add selected issues to the current session context.",
+            id: 'issue-triage-board',
+            displayName: 'Issue triage board',
+            description: 'Rank open GitHub issues by likely urgency and add selected issues to the current session context.',
             actions: [
                 {
-                    name: "refresh",
-                    description: "Refresh the issue ranking shown on the board.",
+                    name: 'refresh',
+                    description: 'Refresh the issue ranking shown on the board.',
                     handler: async () => await loadIssues(),
                 },
                 {
-                    name: "add_issue_to_context",
-                    description: "Add an issue from the board to the current Copilot session context.",
+                    name: 'add_issue_to_context',
+                    description: 'Add an issue from the board to the current Copilot session context.',
                     inputSchema: {
-                        type: "object",
-                        properties: { number: { type: "integer", minimum: 1 } },
-                        required: ["number"],
+                        type: 'object',
+                        properties: { number: { type: 'integer', minimum: 1 } },
+                        required: ['number'],
                         additionalProperties: false,
                     },
                     handler: async (ctx) => {
@@ -225,7 +225,7 @@ session = await joinSession({
                     entry = await startServer(await loadIssues());
                     servers.set(ctx.instanceId, entry);
                 }
-                return { title: "Issue triage board", url: entry.url };
+                return { title: 'Issue triage board', url: entry.url };
             },
             onClose: async (ctx) => {
                 const entry = servers.get(ctx.instanceId);
