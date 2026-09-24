@@ -9,7 +9,7 @@ const MAX_DISPLAY_ROWS = 250;
 const PROJECT_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..', '..');
 
 function databaseUrl() {
-    return process.env.DATABASE_URL ?? `file:${join(PROJECT_ROOT, ".data", "tailspin.db")}`;
+    return process.env.DATABASE_URL ?? `file:${join(PROJECT_ROOT, '.data', 'tailspin.db')}`;
 }
 
 function readRequestBody(request) {
