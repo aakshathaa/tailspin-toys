@@ -33,7 +33,7 @@ test.describe('Home Page', () => {
       await expect(page).toHaveURL(/category=2/);
       const gameCards = page.locator('[data-testid^="game-card-"]');
       const visibleCards = await gameCards.evaluateAll((cards) =>
-        cards.filter((card) => window.getComputedStyle(card).display !== 'none').length
+        cards.filter((card) => window.getComputedStyle(card).display !== 'none').length,
       );
       expect(visibleCards).toBe(8);
       await expect(page.getByRole('heading', { name: 'DevOps Dominion', exact: true })).toBeVisible();
@@ -55,7 +55,7 @@ test.describe('Home Page', () => {
       await expect(page).toHaveURL(/publisher=1/);
       const gameCards = page.locator('[data-testid^="game-card-"]');
       const visibleCards = await gameCards.evaluateAll((cards) =>
-        cards.filter((card) => window.getComputedStyle(card).display !== 'none').length
+        cards.filter((card) => window.getComputedStyle(card).display !== 'none').length,
       );
       expect(visibleCards).toBe(2);
       await expect(page.getByRole('heading', { name: 'DevOps Dominion', exact: true })).toBeVisible();

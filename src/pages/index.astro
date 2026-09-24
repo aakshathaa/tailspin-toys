@@ -2,7 +2,6 @@
 import Layout from '../layouts/Layout.astro';
 import GameCard from '../components/GameCard.astro';
 import PageHero from '../components/PageHero.astro';
-import EmptyState from '../components/EmptyState.astro';
 import { getDatabase } from '../lib/db';
 import { getAllCategories, getAllPublishers, getGamesByFilters } from '../lib/games';
 
@@ -124,8 +123,9 @@ const hasActiveFilters = allCategoryIds.length > 0 || (selectedPublisherIdNum !=
     let visibleCount = 0;
 
     gameCards.forEach((card) => {
-      const categoryIdsStr = card.getAttribute('data-game-category') || '';
-      const publisherIdStr = card.getAttribute('data-game-publisher') || '';
+      const gameCard = card as HTMLElement;
+      const categoryIdsStr = gameCard.getAttribute('data-game-category') || '';
+      const publisherIdStr = gameCard.getAttribute('data-game-publisher') || '';
 
       const gameCategories = categoryIdsStr ? categoryIdsStr.split(',').map(Number) : [];
       const gamePublisher = publisherIdStr ? Number(publisherIdStr) : null;
@@ -144,7 +144,7 @@ const hasActiveFilters = allCategoryIds.length > 0 || (selectedPublisherIdNum !=
       }
 
       const isVisible = matchesCategory && matchesPublisher;
-      card.style.display = isVisible ? '' : 'none';
+      gameCard.style.display = isVisible ? '' : 'none';
       if (isVisible) visibleCount++;
     });
 
