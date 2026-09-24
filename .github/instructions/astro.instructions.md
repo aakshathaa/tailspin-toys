@@ -32,6 +32,8 @@ const games = await getAllGames(getDatabase());
 </Layout>
 ```
 
+Every reusable component in `src/components/` and `src/layouts/` must define and document its `Props` interface in frontmatter. The TSDoc comment should describe the component's contract and clarify each prop whose purpose, allowed values, or rendering behavior is not obvious from its type. Keep the interface and comment current whenever the component API changes.
+
 ## Layouts
 
 - Create reusable layout components in `src/layouts/`
@@ -110,12 +112,16 @@ There is no Svelte/React layer. When a page genuinely needs client behaviour, ad
 
 - Use TypeScript for type-safe props
 - Define `Props` interface in frontmatter
+- Document every reusable component's `Props` interface; comments should explain the component contract and non-obvious props, not restate property names or markup.
 - Type component imports and helper return values
+- Use two spaces for indentation, single quotes, semicolons, and trailing commas in multiline TypeScript.
+- Prefer `import type` for type-only imports. ESLint enforces the repository's applicable TypeScript formatting conventions.
 - Run `npx astro sync` to (re)generate route/content types before linting or type-checking
 - `.astro` files are type-checked by `npm run typecheck:astro` (which runs `astro sync` then `astro check`), on the classic `typescript` package. The pure TypeScript in `db/`, `src/lib/`, and `src/types/` is type-checked separately by `npm run typecheck` (the native TS 7 compiler, `tsgo`), which does **not** process `.astro` files.
 
 ## Best Practices
 
+- Comment intent and non-obvious decisions, not code mechanics. Delete or update comments that become stale when the related code changes.
 - Keep data fetching in frontmatter (build time); avoid client-side fetching
 - Minimize client-side JavaScript — the default is zero JS shipped
 - Import and use global CSS styles from layouts

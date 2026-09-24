@@ -27,6 +27,9 @@ export default [
         "error",
         { argsIgnorePattern: "^_", varsIgnorePattern: "^_" },
       ],
+      "comma-dangle": ["error", "always-multiline"],
+      quotes: ["error", "single", { avoidEscape: true }],
+      semi: ["error", "always"],
     },
   },
 
