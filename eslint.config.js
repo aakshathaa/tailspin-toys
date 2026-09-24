@@ -1,12 +1,12 @@
-import js from "@eslint/js";
-import tseslint from "typescript-eslint";
-import eslintPluginAstro from "eslint-plugin-astro";
-import globals from "globals";
+import js from '@eslint/js';
+import tseslint from 'typescript-eslint';
+import eslintPluginAstro from 'eslint-plugin-astro';
+import globals from 'globals';
 
 export default [
   // Global ignores
   {
-    ignores: ["dist/", "node_modules/", ".astro/", "db/migrations/"],
+    ignores: ['dist/', 'node_modules/', '.astro/', 'db/migrations/'],
   },
 
   // Base JavaScript/TypeScript recommended rules
@@ -23,13 +23,13 @@ export default [
     },
     rules: {
       // Allow unused variables prefixed with _ (common convention for intentional skips)
-      "@typescript-eslint/no-unused-vars": [
-        "error",
-        { argsIgnorePattern: "^_", varsIgnorePattern: "^_" },
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        { argsIgnorePattern: '^_', varsIgnorePattern: '^_' },
       ],
-      "comma-dangle": ["error", "always-multiline"],
-      quotes: ["error", "single", { avoidEscape: true }],
-      semi: ["error", "always"],
+      'comma-dangle': ['error', 'always-multiline'],
+      quotes: ['error', 'single', { avoidEscape: true }],
+      semi: ['error', 'always'],
     },
   },
 
@@ -38,7 +38,7 @@ export default [
 
   // TypeScript-specific overrides
   {
-    files: ["**/*.ts"],
+    files: ['**/*.ts'],
     languageOptions: {
       parser: tseslint.parser,
     },
